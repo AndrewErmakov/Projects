@@ -1,14 +1,11 @@
 from getWord import get_word
 import constants
-
-
-# import os
-# import json
+from table_highscores import RecordTable, PlayerResult
 
 
 class HangMan:
 
-    def __init__(self):
+    def __init__(self, record_table: RecordTable):
         self.used_symbols = []
         self.result_points = constants.RESULTS_POINTS
         self.count_possible_mistakes = constants.MAXIMUM_NUMBER_MISTAKES
@@ -17,6 +14,8 @@ class HangMan:
         self.number_consecutive_invalid_letters = constants.NUMBER_CONSECUTIVE_ERRORS
         self.penalty_points = constants.SURCHARGE
         self.intermediate_points = constants.NUMBER_INTERMEDIATE_POINTS
+
+        self.record_table = record_table
 
     # функция определения условий продолжения игры
     def game_continuation_conditions(self):
@@ -90,7 +89,7 @@ class HangMan:
 
     # функция начала игры "Виселица"
     def start_game(self, hidden_word: str) -> str:
-
+        self.player_name = input('Введите ваше имя: ')
         self.hidden_word = hidden_word
         self.mask_word = list('*' * len(hidden_word))
 
@@ -130,7 +129,14 @@ class HangMan:
             if self.conditions_receiving_penalty_points():
                 self.penalty_points -= 40 * self.number_consecutive_invalid_letters // 3
 
-        return self.get_results()
+        results = self.get_results()
+        self.record_table.add_record(PlayerResult(
+            name_player=self.player_name,
+            count_points=self.result_points,
+            count_mistakes=constants.MAXIMUM_NUMBER_MISTAKES - self.count_possible_mistakes
+        ))
+
+        return results
 
 
 def game_mode_definition(flag):
@@ -140,14 +146,12 @@ def game_mode_definition(flag):
 if __name__ == '__main__':
 
     game_mode = True
+    record_table = RecordTable('db.json')
 
     while game_mode:
-        # player_name = input('Введите свое имя: ')
-        game = HangMan()
+        game = HangMan(record_table)
         print(game.start_game(get_word()))
         print()
         print('Хотите ли вы еще сыграть в игру? (yes/no)')
         participant_decision = input()
         game_mode = game_mode_definition(participant_decision)
-
-

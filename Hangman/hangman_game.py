@@ -17,8 +17,11 @@ class HangMan:
 
         self.record_table = record_table
 
-    # функция определения условий продолжения игры
     def game_continuation_conditions(self):
+        """
+        Функция определения условий продолжения игры
+        :return: продолжать ли игру или нет?
+        """
         return self.count_possible_mistakes > 0 and '*' in self.mask_word
 
     # функция определения условий для подсчета количества верно подряд отгаданных букв
@@ -27,7 +30,7 @@ class HangMan:
         self.number_consecutive_valid_letters += 1
 
     # функция определения условий для начисления бонусных баллов
-    def conditions_receiving_penalty_points(self):
+    def conditions_receiving_bonus_points(self):
         return self.number_consecutive_valid_letters % 3 == 0 and self.number_consecutive_valid_letters > 0
 
     # функция определения условий для подсчета количества неверно подряд отгаданных букв
@@ -35,14 +38,18 @@ class HangMan:
         self.count_possible_mistakes -= 1
         self.number_consecutive_valid_letters = 0
         self.number_consecutive_invalid_letters += 1
-        self.intermediate_points -= 2
+        self.intermediate_points -= 5
 
-    # функция определения условий для начисления штрафных баллов
     def conditions_receiving_penalty_points(self):
+        """
+        Функция определения условий для начисления штрафных баллов
+        """
         return self.number_consecutive_invalid_letters % 3 == 0 and self.number_consecutive_invalid_letters > 0
 
-    # функция получения итогового результата игры
     def get_results(self):
+        """
+        Функция получения итогового результата игры
+        """
         if self.count_possible_mistakes == 0:
             self.result_points = int((-50 + self.intermediate_points + self.bonus_points + self.penalty_points) *
                                      len(self.hidden_word) / 6)
@@ -87,8 +94,22 @@ class HangMan:
             self.mask_word[index_guessed_letter] = self.hidden_word[index_guessed_letter]
             key = index_guessed_letter
 
-    # функция начала игры "Виселица"
+    def output_preliminary_results(self):
+        """
+        Функция вывода предварительного результата
+        """
+        print('Промежуточные баллы: ' + str(self.intermediate_points))
+        print('Бонусные баллы: ' + str(self.bonus_points))
+        print('Штрафные баллы: ' + str(self.penalty_points))
+        print(self.used_symbols)
+        print()
+
     def start_game(self, hidden_word: str) -> str:
+        """
+        Функция начала игры "Виселица"
+        :param hidden_word: загаданное слово
+        :return: Результат игры (выигрыш / проигрыш)
+        """
         self.player_name = input('Введите ваше имя: ')
         self.hidden_word = hidden_word
         self.mask_word = list('*' * len(hidden_word))
@@ -103,13 +124,13 @@ class HangMan:
             if len(possible_symbol) > 1:
                 self.process_multiple_letters()
 
-            # если буква не угадана
-            elif count_possible_symbol_in_hidden_word == 0:
-                self.process_wrong_letter()
-
             # если пользователь ввел ту букву, которую уже вводил
             elif possible_symbol in self.used_symbols:
                 self.process_repeatable_letter()
+
+            # если буква не угадана
+            elif count_possible_symbol_in_hidden_word == 0:
+                self.process_wrong_letter()
 
             # если пользователь не ввел букву
             elif len(possible_symbol) == 0:
@@ -121,13 +142,15 @@ class HangMan:
 
                 self.intermediate_points += 2 * count_possible_symbol_in_hidden_word
 
-                if self.conditions_receiving_penalty_points():
-                    self.bonus_points += 50 * self.number_consecutive_valid_letters
+                if self.conditions_receiving_bonus_points():
+                    self.bonus_points += 50 * self.number_consecutive_valid_letters // 3
 
             self.used_symbols.append(possible_symbol)
 
             if self.conditions_receiving_penalty_points():
                 self.penalty_points -= 40 * self.number_consecutive_invalid_letters // 3
+
+            self.output_preliminary_results()
 
         results = self.get_results()
         self.record_table.add_record(PlayerResult(
@@ -140,7 +163,7 @@ class HangMan:
 
 
 def game_mode_definition(flag):
-    return flag == 'yes'
+    return flag in ['yes', 'y']
 
 
 if __name__ == '__main__':
@@ -152,6 +175,5 @@ if __name__ == '__main__':
         game = HangMan(record_table)
         print(game.start_game(get_word()))
         print()
-        print('Хотите ли вы еще сыграть в игру? (yes/no)')
-        participant_decision = input()
+        participant_decision = input('Хотите ли вы еще сыграть в игру? (yes/no)').lower()
         game_mode = game_mode_definition(participant_decision)

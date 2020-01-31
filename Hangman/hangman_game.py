@@ -1,4 +1,4 @@
-from getWord import get_word
+from getWord import Vocabulary
 import constants
 from table_highscores import RecordTable, PlayerResult
 
@@ -168,12 +168,22 @@ def game_mode_definition(flag):
 
 if __name__ == '__main__':
 
-    game_mode = True
-    record_table = RecordTable('db.json')
+    vocabulary = Vocabulary()
+    number_mode = int(input("Хотите сыграть в игру (1)/добавить новое слово (2)/выйти из программы(0)?: "))
+    while number_mode != 0:
+        if number_mode == 1:
+            game_mode = True
+            record_table = RecordTable('db.json')
 
-    while game_mode:
-        game = HangMan(record_table)
-        print(game.start_game(get_word()))
-        print()
-        participant_decision = input('Хотите ли вы еще сыграть в игру? (yes/no)').lower()
-        game_mode = game_mode_definition(participant_decision)
+            while game_mode:
+                game = HangMan(record_table)
+                print(game.start_game(vocabulary.get_word()))
+
+                print()
+                participant_decision = input('Хотите ли вы еще сыграть в игру? (yes/no)').lower()
+                game_mode = game_mode_definition(participant_decision)
+
+        elif number_mode == 2:
+            vocabulary.add_new_word()
+
+        number_mode = int(input("Хотите сыграть в игру (1)/добавить новое слово (2)/выйти из программы(0)?: "))

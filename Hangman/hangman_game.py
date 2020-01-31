@@ -167,23 +167,22 @@ def game_mode_definition(flag):
 
 
 if __name__ == '__main__':
-
     vocabulary = Vocabulary()
     number_mode = int(input("Хотите сыграть в игру (1)/добавить новое слово (2)/выйти из программы(0)?: "))
+
     while number_mode != 0:
         if number_mode == 1:
             game_mode = True
             record_table = RecordTable('db.json')
-
-            while game_mode:
-                game = HangMan(record_table)
-                print(game.start_game(vocabulary.get_word()))
-
-                print()
-                participant_decision = input('Хотите ли вы еще сыграть в игру? (yes/no)').lower()
-                game_mode = game_mode_definition(participant_decision)
+            game = HangMan(record_table)
+            print(game.start_game(vocabulary.get_word()))
+            print()
 
         elif number_mode == 2:
             vocabulary.add_new_word()
 
         number_mode = int(input("Хотите сыграть в игру (1)/добавить новое слово (2)/выйти из программы(0)?: "))
+
+    print('Пока!')
+    exit()
+

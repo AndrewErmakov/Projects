@@ -50,34 +50,18 @@ def get_page_data(html):
                                                                            class_='description item_table-description')
 
     writer = Writer()
-    number_phone_recognition = NumberPhone()  # Определение экземпляра класса распознавания номера телефона
+    number_phone_recognition = NumberPhone()  # Определение экземпляра класса определения номера телефона
 
     for ad in ads:
-        try:
-            title = ad.find('div', class_='snippet-title-row').find('h3').text.strip()
-        except:
-            title = ''
 
+        title = ad.find('div', class_='snippet-title-row').find('h3').text.strip()
+        url = DOMAIN + ad.find('div', class_='snippet-title-row').find('h3').find('a').get('href')
         try:
-            url = DOMAIN + ad.find('div', class_='snippet-title-row').find('h3').find('a').get('href')
-
-        except:
-            url = ''
-
-        try:
-            number_phone = number_phone_recognition.navigate(url)
+            number_phone = number_phone_recognition.main(url)
         except:
             number_phone = ''
-
-        try:
-            price = ad.find('div', class_='snippet-price-row').find('span', class_='snippet-price').text.strip()
-        except:
-            price = ''
-
-        try:
-            address = ad.find('div', class_='item-address').find('span', class_='item-address__string').text.strip()
-        except:
-            address = ''
+        price = ad.find('div', class_='snippet-price-row').find('span', class_='snippet-price').text.strip()
+        address = ad.find('div', class_='item-address').find('span', class_='item-address__string').text.strip()
 
         data = {
             'title': title,
@@ -90,9 +74,5 @@ def get_page_data(html):
         writer.write(data)
 
 
-def main():
-    get_page_data(get_html(URL))
-
-
 if __name__ == '__main__':
-    main()
+    get_page_data(get_html(URL))

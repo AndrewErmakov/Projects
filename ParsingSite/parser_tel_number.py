@@ -1,12 +1,13 @@
+import base64
 import os
 import time
 
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.firefox.options import Options
+from bs4 import BeautifulSoup
 
 from PIL import Image
-
 from pytesseract import image_to_string
 
 
@@ -15,47 +16,51 @@ class NumberPhone:
         self.options = Options()
         self.options.headless = True
         self.driver = webdriver.Firefox(options=self.options)
-
         os.makedirs('screenshots', exist_ok=True)
+        self.counter_screenshots = 1
 
-    def navigate(self, url):
+    def main(self, url):
+        telephone_number_page = self.navigate_to_telephone_number_page(url)
+
+        base64_string_link_image_number_phone = self.get_link_base64_image_number_phone(telephone_number_page)
+        file_path = 'screenshots/screen' + str(self.counter_screenshots) + '.png'
+        self.save_image_number_phone(base64_string_link_image_number_phone, file_path)
+
+        number_phone = self.phone_recognition(file_path)
+        return number_phone
+
+    def navigate_to_telephone_number_page(self, url):
         self.driver.get(url)
-
         time.sleep(15)
         button = self.driver.find_element(By.CLASS_NAME, 'js-item-phone-number')
         button.click()
-
         time.sleep(3)
-        self.take_screenshot()
+        telephone_number_page = self.driver.page_source
+        self.driver.quit()
+        return telephone_number_page
 
-        # image_phone = self.driver.find_element(By.CLASS_NAME, 'item-phone-big-number').find_element(By.TAG_NAME, 'img').get_attribute('src')
+    def get_link_base64_image_number_phone(self, html_page):
+        soup = BeautifulSoup(html_page, 'html.parser')
+        try:
+            link_image_number_phone = soup.find('div', class_='popup-content').find(
+                'div', class_='item-popup-content js-item-phone-popup-content').find(
+                'div', class_='item-phone-big-number js-item-phone-big-number').find('img').attrs['src']
 
-        image_phone = self.driver.find_element_by_xpath(
-            '//div[@class="item-phone-big-number js-item-phone-big-number"]/img')
+        except AttributeError:
+            link_image_number_phone = 'Not found'
 
-        location = image_phone.location
-        size = image_phone.size
+        return link_image_number_phone
 
-        phone = self.phone_recognition(location, size)
-        return phone
+    def save_image_number_phone(self, base64_link, file_name):
+        base64_link = base64_link.replace('data:image/png;base64,', '')
+        img_data = base64.b64decode(base64_link)
+        with open(file_name, 'wb') as file:
+            file.write(img_data)
+            file.close()
 
-    def take_screenshot(self):
-        self.driver.save_screenshot('screenshots/screenshot.png')
-
-    def crop(self, location, size):
-        image = Image.open('screenshots/screenshot.png')
-        x = location['x']
-        y = location['y']
-        width = size['width']
-        height = size['height']
-
-        image.crop((x, y, x + width, y + height)).save('screenshots/screenshot.png')
-
-    def phone_recognition(self, location, size):
-        self.crop(location, size)
-        image = Image.open('screenshots/screenshot.png')
-        number_phone = image_to_string(image).replace(' ', '').replace('-', '')
+    def phone_recognition(self, image):
+        image_number_phone = Image.open(image)
+        number_phone = image_to_string(image_number_phone).replace(' ', '').replace('-', '')
         return number_phone
-
 
 

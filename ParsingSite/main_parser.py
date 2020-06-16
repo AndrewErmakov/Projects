@@ -50,10 +50,10 @@ def get_page_data(html):
                                                                            class_='description item_table-description')
 
     writer = Writer()
-    number_phone_recognition = NumberPhone()  # Определение экземпляра класса определения номера телефона
 
     for ad in ads:
 
+        number_phone_recognition = NumberPhone()  # Определение экземпляра класса определения номера телефона
         title = ad.find('div', class_='snippet-title-row').find('h3').text.strip()
         url = DOMAIN + ad.find('div', class_='snippet-title-row').find('h3').find('a').get('href')
         try:

@@ -17,13 +17,12 @@ class NumberPhone:
         self.options.headless = True
         self.driver = webdriver.Firefox(options=self.options)
         os.makedirs('screenshots', exist_ok=True)
-        self.counter_screenshots = 1
 
     def main(self, url):
         telephone_number_page = self.navigate_to_telephone_number_page(url)
 
         base64_string_link_image_number_phone = self.get_link_base64_image_number_phone(telephone_number_page)
-        file_path = 'screenshots/screen' + str(self.counter_screenshots) + '.png'
+        file_path = 'screenshots/screen.png'
         self.save_image_number_phone(base64_string_link_image_number_phone, file_path)
 
         number_phone = self.phone_recognition(file_path)
@@ -34,7 +33,7 @@ class NumberPhone:
         time.sleep(15)
         button = self.driver.find_element(By.CLASS_NAME, 'js-item-phone-number')
         button.click()
-        time.sleep(3)
+        time.sleep(15)
         telephone_number_page = self.driver.page_source
         self.driver.quit()
         return telephone_number_page
@@ -62,5 +61,3 @@ class NumberPhone:
         image_number_phone = Image.open(image)
         number_phone = image_to_string(image_number_phone).replace(' ', '').replace('-', '')
         return number_phone
-
-

@@ -6,6 +6,7 @@ from bs4 import BeautifulSoup
 from secrets import URL, DOMAIN
 from parser_tel_number import NumberPhone
 from parser_district_city import DefinitionGeoLocation
+from sent_file_result_parsing import EmailResults
 
 
 class Writer:
@@ -85,3 +86,10 @@ def get_page_data(html):
 
 if __name__ == '__main__':
     get_page_data(get_html(URL))
+    solution_for_send_file = input('Do you want to send the result of parsing to mail? (y/n)')
+
+    if solution_for_send_file.lower()[0] in ['y', 'д']:
+        send_results = EmailResults()
+        send_results.send_file('data.csv')
+
+

@@ -5,6 +5,7 @@ from bs4 import BeautifulSoup
 
 from secrets import URL, DOMAIN
 from parser_tel_number import NumberPhone
+from parser_district_city import DefinitionGeoLocation
 
 
 class Writer:
@@ -16,14 +17,16 @@ class Writer:
                               'Цена',
                               'Адрес',
                               'Ссылка на объявление',
-                              'Номер телефона'])
+                              'Номер телефона',
+                              'Район'])
 
     def write(self, data):
         self.writer.writerow((data['title'],
                               data['price'],
                               data['address'],
                               data['url'],
-                              data['phone']))
+                              data['phone'],
+                              data['district']))
 
     def __del__(self):
         self.file.close()
@@ -50,7 +53,7 @@ def get_page_data(html):
                                                                            class_='description item_table-description')
 
     writer = Writer()
-
+    geo_location = DefinitionGeoLocation()
     for ad in ads:
 
         number_phone_recognition = NumberPhone()  # Определение экземпляра класса определения номера телефона
@@ -63,12 +66,18 @@ def get_page_data(html):
         price = ad.find('div', class_='snippet-price-row').find('span', class_='snippet-price').text.strip()
         address = ad.find('div', class_='item-address').find('span', class_='item-address__string').text.strip()
 
+        try:
+            district = geo_location.get_name_district(address)
+        except:
+            district = ''
+
         data = {
             'title': title,
             'price': price,
             'address': address,
             'url': url,
-            'phone': number_phone
+            'phone': number_phone,
+            'district': district
         }
 
         writer.write(data)

@@ -10,6 +10,11 @@ from parser_tel_number import NumberPhone
 from parser_district_city import DefinitionGeoLocation
 from sent_file_result_parsing import EmailResults
 
+headlines = {
+    'купить': 'prodam',
+    'снять': 'sdam'
+}
+
 
 class Writer:
     def __init__(self, file_name):
@@ -88,30 +93,35 @@ def get_page_data(html, file_name):
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
+
     parser.add_argument("--count_rooms", type=int,
                         help="display a number of rooms in flat of your dream",
                         default=1,
                         choices=range(1, 6))
+
     parser.add_argument('--search_purpose', type=str,
                         help="display a type of ad about flat",
                         default='снять',
                         choices=['снять', 'купить'])
+
     parser.add_argument('--file_name', type=str,
                         help='name of the file to save the parsing result to (in the format csv)',
                         default='Results' + datetime.datetime.today().strftime("%Y%m%d"))
+
+    parser.add_argument('--solution_for_send_file', type=bool,
+                        help='Do you want to send the result of parsing to mail?',
+                        default=False,
+                        choices=[True, False])
+
     arguments = parser.parse_args()
 
     count_rooms = str(arguments.count_rooms)
     file_name = arguments.file_name
-
-    if arguments.search_purpose.lower() == 'купить':
-        headline = 'prodam'
-    elif arguments.search_purpose.lower() == 'снять':
-        headline = 'sdam'
+    headline = headlines[arguments.search_purpose]
+    solution_for_send_file = arguments.solution_for_send_file
 
     get_page_data(get_html(URL), file_name)
-    solution_for_send_file = input('Do you want to send the result of parsing to mail? (y/n)')
 
-    if solution_for_send_file.lower()[0] in ['y', 'д']:
+    if bool(solution_for_send_file) is True:
         send_results = EmailResults()
-        send_results.send_file('data.csv')
+        send_results.send_file(f'{file_name}.csv')

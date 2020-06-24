@@ -1,5 +1,6 @@
 import argparse
 import csv
+import datetime
 
 import requests
 from bs4 import BeautifulSoup
@@ -11,8 +12,8 @@ from sent_file_result_parsing import EmailResults
 
 
 class Writer:
-    def __init__(self):
-        self.file_name = 'data.csv'
+    def __init__(self, file_name):
+        self.file_name = f'{file_name}.csv'
         self.file = open(self.file_name, 'w')
         self.writer = csv.writer(self.file)
         self.writer.writerow(['Краткая основная информация',
@@ -47,14 +48,14 @@ def get_total_pages(html):
     return count_total_pages
 
 
-def get_page_data(html):
+def get_page_data(html, file_name):
     """Функция получения данных страницы"""
     soup = BeautifulSoup(html, 'html.parser')
 
     ads = soup.find('div', class_='snippet-list js-catalog_serp').find_all('div',
                                                                            class_='description item_table-description')
 
-    writer = Writer()
+    writer = Writer(file_name)
     geo_location = DefinitionGeoLocation()
     for ad in ads:
 
@@ -87,18 +88,28 @@ def get_page_data(html):
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
-    parser.add_argument("-count_rooms", type=int, help="display a number of rooms in flat of your dream", default=1)
-    parser.add_argument('-search_purpose', type=str, help="display a type of ad", default='снять')
+    parser.add_argument("--count_rooms", type=int,
+                        help="display a number of rooms in flat of your dream",
+                        default=1,
+                        choices=range(1, 6))
+    parser.add_argument('--search_purpose', type=str,
+                        help="display a type of ad about flat",
+                        default='снять',
+                        choices=['снять', 'купить'])
+    parser.add_argument('--file_name', type=str,
+                        help='name of the file to save the parsing result to (in the format csv)',
+                        default='Results' + datetime.datetime.today().strftime("%Y%m%d"))
     arguments = parser.parse_args()
 
     count_rooms = str(arguments.count_rooms)
+    file_name = arguments.file_name
 
     if arguments.search_purpose.lower() == 'купить':
         headline = 'prodam'
     elif arguments.search_purpose.lower() == 'снять':
         headline = 'sdam'
 
-    get_page_data(get_html(URL))
+    get_page_data(get_html(URL), file_name)
     solution_for_send_file = input('Do you want to send the result of parsing to mail? (y/n)')
 
     if solution_for_send_file.lower()[0] in ['y', 'д']:

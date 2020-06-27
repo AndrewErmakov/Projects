@@ -108,10 +108,8 @@ if __name__ == '__main__':
                         help='name of the file to save the parsing result to (in the format csv)',
                         default='Results' + datetime.datetime.today().strftime("%Y%m%d"))
 
-    parser.add_argument('--solution_for_send_file', type=bool,
-                        help='Do you want to send the result of parsing to mail?',
-                        default=False,
-                        choices=[True, False])
+	 parser.add_argument('--solution_for_send_file', action='store_true',
+							help='Do you want to send the result of parsing to mail?')
 
     arguments = parser.parse_args()
 

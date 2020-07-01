@@ -9,6 +9,7 @@ from secrets import URL, DOMAIN, headline, count_rooms
 from parser_tel_number import NumberPhone
 from parser_district_city import DefinitionGeoLocation
 from sent_file_result_parsing import EmailResults
+from add_statistic_data import PricingDetermination
 
 headlines = {
     'купить': 'prodam',
@@ -65,15 +66,14 @@ def get_page_data(html, file_name):
     for ad in ads:
 
         number_phone_recognition = NumberPhone()  # Определение экземпляра класса определения номера телефона
-        title = ad.find('div', class_='snippet-title-row').find('h3').text.strip()
+        title = ad.find('div', class_='snippet-title-row').find('h3').text.strip().replace(',', '')
         url = DOMAIN + ad.find('div', class_='snippet-title-row').find('h3').find('a').get('href')
         try:
             number_phone = number_phone_recognition.main(url)
         except:
             number_phone = ''
-        price = ad.find('div', class_='snippet-price-row').find('span', class_='snippet-price').text.strip()
-        address = ad.find('div', class_='item-address').find('span', class_='item-address__string').text.strip()
-
+        price = ad.find('div', class_='snippet-price-row').find('span', class_='snippet-price').text.strip().replace('в месяц', '').strip().replace('₽', '').strip().replace(' ', '')
+        address = ad.find('div', class_='item-address').find('span', class_='item-address__string').text.strip().replace('ул.', '').replace(',', '').strip().replace('  ', ' ')
         try:
             district = geo_location.get_name_district(address)
         except:
@@ -108,7 +108,7 @@ if __name__ == '__main__':
                         help='name of the file to save the parsing result to (in the format csv)',
                         default='Results' + datetime.datetime.today().strftime("%Y%m%d"))
 
-	 parser.add_argument('--solution_for_send_file', action='store_true',
+    parser.add_argument('--solution_for_send_file', action='store_true',
 							help='Do you want to send the result of parsing to mail?')
 
     arguments = parser.parse_args()
@@ -119,6 +119,9 @@ if __name__ == '__main__':
     solution_for_send_file = arguments.solution_for_send_file
 
     get_page_data(get_html(URL), file_name)
+
+    get_statistic_data = PricingDetermination(f'{file_name}.csv')
+    get_statistic_data.determine_difference_price()
 
     if bool(solution_for_send_file) is True:
         send_results = EmailResults()

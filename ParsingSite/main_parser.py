@@ -7,7 +7,7 @@ from bs4 import BeautifulSoup
 
 from secrets import URL, DOMAIN, headline, count_rooms
 from parser_tel_number import NumberPhone
-from parser_district_city import DefinitionGeoLocation
+from parser_district_city import DefinitionGeoLocation, AlternativeWayDefinitionGeoLocation
 from sent_file_result_parsing import EmailResults
 from add_statistic_data import PricingDetermination
 
@@ -74,10 +74,14 @@ def get_page_data(html, file_name):
             number_phone = ''
         price = ad.find('div', class_='snippet-price-row').find('span', class_='snippet-price').text.strip().replace('в месяц', '').strip().replace('₽', '').strip().replace(' ', '')
         address = ad.find('div', class_='item-address').find('span', class_='item-address__string').text.strip().replace('ул.', '').replace(',', '').strip().replace('  ', ' ')
+
         try:
             district = geo_location.get_name_district(address)
+
         except:
-            district = ''
+            district = 'Not found'
+            # alternative_way_get_district = AlternativeWayDefinitionGeoLocation()
+            # district = alternative_way_get_district.alternative_way_get_name_district(address)
 
         data = {
             'title': title,

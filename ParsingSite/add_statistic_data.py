@@ -9,7 +9,7 @@ class PricingDetermination:
         data = pd.read_csv(self.file_name)
         all_prices = data['Цена']
         median_price = statistics.median(all_prices)
-        average_price = statistics.mean(all_prices)
+        average_price = int(statistics.mean(all_prices))
         mode_price = statistics.mode(all_prices)
         data['Разница цены в ₽ относительно медианной цены'] = data['Цена'] - median_price
         data['Разница цены в ₽ относительно средней цены'] = data['Цена'] - average_price

@@ -9,7 +9,7 @@ from secrets import URL, DOMAIN, headline, count_rooms
 from parser_tel_number import NumberPhone
 from parser_district_city import DefinitionGeoLocation, AlternativeWayDefinitionGeoLocation
 from sent_file_result_parsing import EmailResults
-from add_statistic_data import PricingDetermination
+from add_statistic_data import GetStatisticData
 
 headlines = {
     'купить': 'prodam',
@@ -124,7 +124,7 @@ if __name__ == '__main__':
 
     get_page_data(get_html(URL), file_name)
 
-    get_statistic_data = PricingDetermination(f'{file_name}.csv')
+    get_statistic_data = GetStatisticData(f'{file_name}.csv')
     get_statistic_data.determine_difference_price()
 
     if bool(solution_for_send_file) is True:

@@ -69,19 +69,18 @@ def get_page_data(html, file_name):
         title = ad.find('div', class_='snippet-title-row').find('h3').text.strip().replace(',', '')
         url = DOMAIN + ad.find('div', class_='snippet-title-row').find('h3').find('a').get('href')
         try:
-            number_phone = number_phone_recognition.main(url)
+            number_phone = int(number_phone_recognition.main(url))
         except:
             number_phone = ''
         price = ad.find('div', class_='snippet-price-row').find('span', class_='snippet-price').text.strip().replace('в месяц', '').strip().replace('₽', '').strip().replace(' ', '')
         address = ad.find('div', class_='item-address').find('span', class_='item-address__string').text.strip().replace('ул.', '').replace(',', '').strip().replace('  ', ' ')
 
         try:
-            district = geo_location.get_name_district(address)
+            district = geo_location.get_name_district(address).strip()
 
-        except:
-            district = 'Not found'
-            # alternative_way_get_district = AlternativeWayDefinitionGeoLocation()
-            # district = alternative_way_get_district.alternative_way_get_name_district(address)
+        except Exception as e:
+            alternative_way_get_district = AlternativeWayDefinitionGeoLocation()
+            district = alternative_way_get_district.alternative_way_get_name_district(address)
 
         data = {
             'title': title,

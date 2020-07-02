@@ -48,19 +48,19 @@ class AlternativeWayDefinitionGeoLocation:
 
         field_entering_address = self.driver.find_element(By.CLASS_NAME, 'form-control')
         field_entering_address.send_keys(address)
-        time.sleep(5)
+        time.sleep(15)
 
         district_definition_button = self.driver.find_element_by_id('getDistrictButton')
         district_definition_button.click()
-        time.sleep(5)
+        time.sleep(15)
 
         full_name_district = self.driver.find_element_by_id('result-element').find_element_by_tag_name('a').text
         field_entering_address.clear()
+        self.driver.quit()
+
         return full_name_district
 
     def alternative_way_get_name_district(self, address):
         full_name_district = self.navigate_to_district(self.desired_city + address)
         district = full_name_district.split()[0]
         return district
-
-

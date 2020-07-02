@@ -4,6 +4,7 @@ import datetime
 
 import requests
 from bs4 import BeautifulSoup
+from pprint import pprint
 
 from secrets import URL, DOMAIN, headline, count_rooms
 from parser_tel_number import NumberPhone
@@ -125,6 +126,7 @@ if __name__ == '__main__':
 
     get_statistic_data = GetStatisticData(f'{file_name}.csv')
     get_statistic_data.determine_difference_price()
+    pprint(get_statistic_data.determination_completeness_data_parsing())
 
     if bool(solution_for_send_file) is True:
         send_results = EmailResults()

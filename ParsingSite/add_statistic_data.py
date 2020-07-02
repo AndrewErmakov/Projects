@@ -27,7 +27,7 @@ class GetStatisticData:
         coeff_correct_phone_number_recognition = count_correctly_recognized_phone_numbers / count_ads
 
         for address in self.data['Адрес']:
-            if any(map(str.isdigit, 'qwe1')) is True:
+            if any(map(str.isdigit, address)) is True:
                 count_correctly_parsed_addresses += 1
         coeff_correct_parsed_addresses = count_correctly_parsed_addresses / count_ads
 

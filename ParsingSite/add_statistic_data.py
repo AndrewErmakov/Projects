@@ -22,7 +22,7 @@ class GetStatisticData:
         count_correctly_recognized_phone_numbers, count_correctly_parsed_addresses, count_correctly_parsed_districts = 0, 0, 0
 
         for number_phone in self.data['Номер телефона']:
-            if str(len(number_phone)) == 11:
+            if len(str(number_phone)) == 11:
                 count_correctly_recognized_phone_numbers += 1
         coeff_correct_phone_number_recognition = count_correctly_recognized_phone_numbers / count_ads
 

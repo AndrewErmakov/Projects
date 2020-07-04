@@ -51,7 +51,7 @@ def get_total_pages(html):
     soup = BeautifulSoup(html, 'html.parser')
     pages = soup.find('div', class_='pagination-root-2oCjZ').find_all('span', class_='pagination-item-1WyVp')
     count_total_pages = pages[-2].get_text()
-    return count_total_pages
+    return int(count_total_pages)
 
 def get_link_with_all_ads(html):
     soup = BeautifulSoup(html, 'html.parser')

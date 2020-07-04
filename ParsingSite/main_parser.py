@@ -4,17 +4,16 @@ import datetime
 
 import requests
 from bs4 import BeautifulSoup
-from pprint import pprint
 
-from secrets import URL, DOMAIN, headline, count_rooms
+from secrets import URL, DOMAIN, headline, count_rooms, optional_info
 from parser_tel_number import NumberPhone
 from parser_district_city import DefinitionGeoLocation, AlternativeWayDefinitionGeoLocation
 from sent_file_result_parsing import EmailResults
 from add_statistic_data import GetStatisticData
 
 headlines = {
-    'купить': 'prodam',
-    'снять': 'sdam'
+    'купить': ['prodam', '', '?'],
+    'снять': ['sdam', '/na_dlitelnyy_srok', '&']
 }
 
 
@@ -54,6 +53,11 @@ def get_total_pages(html):
     count_total_pages = pages[-2].get_text()
     return count_total_pages
 
+def get_link_with_all_ads(html):
+    soup = BeautifulSoup(html, 'html.parser')
+    current_link_with_ads = soup.find('div', {'class': 'pagination-pages clearfix'}).find('a', {'class': 'pagination-page'}).get('href')
+    return DOMAIN + current_link_with_ads
+
 
 def get_page_data(html, file_name):
     """Функция получения данных страницы"""
@@ -71,7 +75,7 @@ def get_page_data(html, file_name):
         url = DOMAIN + ad.find('div', class_='snippet-title-row').find('h3').find('a').get('href')
         try:
             number_phone = int(number_phone_recognition.main(url))
-        except:
+        except Exception as e:
             number_phone = 'Not found'
         price = ad.find('div', class_='snippet-price-row').find('span', class_='snippet-price').text.strip().replace('в месяц', '').strip().replace('₽', '').strip().replace(' ', '')
         address = ad.find('div', class_='item-address').find('span', class_='item-address__string').text.strip().replace('ул.', '').replace(',', '').strip().replace('  ', ' ')
@@ -119,14 +123,26 @@ if __name__ == '__main__':
 
     count_rooms = str(arguments.count_rooms)
     file_name = arguments.file_name
-    headline = headlines[arguments.search_purpose]
+
+    headline = headlines[arguments.search_purpose][0]
+    optional_info = headlines[arguments.search_purpose][1]
+    symbol_page = headlines[arguments.search_purpose][2]
+
     solution_for_send_file = arguments.solution_for_send_file
 
-    get_page_data(get_html(URL), file_name)
+
+    total_pages = get_total_pages(get_html(URL))
+
+    full_url = get_link_with_all_ads(get_html(URL))
+
+
+    for num_page in range(1, total_pages + 1):
+        get_page_data(get_html(full_url + f'{symbol_page}p={num_page}'), file_name)
 
     get_statistic_data = GetStatisticData(f'{file_name}.csv')
     get_statistic_data.determine_difference_price()
-    pprint(get_statistic_data.determination_completeness_data_parsing())
+    get_statistic_data.draw_pie_chart_district_frequency()
+
 
     if bool(solution_for_send_file) is True:
         send_results = EmailResults()

@@ -1,6 +1,9 @@
 import pandas as pd
 import statistics
 import json
+import matplotlib.pyplot as plt
+import matplotlib as mpl
+from collections import OrderedDict
 
 class GetStatisticData:
     def __init__(self, file_name):
@@ -38,6 +41,7 @@ class GetStatisticData:
         coeff_correct_parsed_districts = count_correctly_parsed_districts / count_ads
 
         result_parsing = {
+            'Количество объявлений': count_ads,
             'Номер телефона': 'Корректность ' + str(int(coeff_correct_phone_number_recognition * 100)) + '%',
             'Адрес': 'Корректность ' + str(int(coeff_correct_parsed_addresses * 100)) + '%',
             'Район': 'Корректность ' + str(int(coeff_correct_parsed_districts * 100)) + '%'
@@ -48,3 +52,34 @@ class GetStatisticData:
             file.close()
 
         return result_parsing
+
+    def draw_pie_chart_district_frequency(self):
+        list_districts = sorted(self.data['Район'])
+
+        frequency_occurrence_area = dict()
+        for district in list_districts:
+            if district not in frequency_occurrence_area:
+                frequency_occurrence_area[district] = 0
+
+                frequency_occurrence_area[district] += 1
+
+        data_names = sorted(set(list_districts))
+
+        dpi = 80
+        fig = plt.figure(dpi=dpi, figsize=(1000 / dpi, 600 / dpi))
+        mpl.rcParams.update({'font.size': 11})
+        plt.title('Frequency of districts (%)')
+
+        plt.pie(
+            list(OrderedDict(frequency_occurrence_area).values()),
+            autopct='%1.1f%%',
+            shadow=True,
+            radius=1.1,
+            wedgeprops={'lw': 1, 'ls': '--', 'edgecolor': "k"},
+            explode=[0.15] + [0 for _ in range(len(data_names) - 1)])
+        plt.legend(
+            bbox_to_anchor=(-0.16, 0.45, 0.25, 0.25),
+            loc='best',
+            labels=data_names)
+
+        fig.savefig('pie.png')

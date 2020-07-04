@@ -15,3 +15,4 @@ six==1.15.0
 soupsieve==2.0.1
 urllib3==1.25.9
 yagmail==0.11.224
+matplotlib~=3.2.2

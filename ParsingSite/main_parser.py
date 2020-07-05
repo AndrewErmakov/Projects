@@ -59,14 +59,13 @@ def get_link_with_all_ads(html):
     return DOMAIN + current_link_with_ads
 
 
-def get_page_data(html, file_name):
+def get_page_data(html, writer):
     """Функция получения данных страницы"""
     soup = BeautifulSoup(html, 'html.parser')
 
     ads = soup.find('div', class_='snippet-list js-catalog_serp').find_all('div',
                                                                            class_='description item_table-description')
 
-    writer = Writer(file_name)
     geo_location = DefinitionGeoLocation()
     for ad in ads:
 
@@ -135,9 +134,11 @@ if __name__ == '__main__':
 
     full_url = get_link_with_all_ads(get_html(URL))
 
+    writer = Writer(file_name)
 
     for num_page in range(1, total_pages + 1):
-        get_page_data(get_html(full_url + f'{symbol_page}p={num_page}'), file_name)
+        get_page_data(get_html(full_url + f'{symbol_page}p={num_page}'), writer)
+        print(f'Закончена страница {num_page}')
 
     get_statistic_data = GetStatisticData(f'{file_name}.csv')
     get_statistic_data.determine_difference_price()
